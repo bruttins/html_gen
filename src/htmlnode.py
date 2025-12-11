@@ -47,5 +47,6 @@ class ParentNode(HTMLNode):
         else:
             childrenlist = []
             for child in self.children:
-                childrenlist.append(#recursive to_html-call)
-            return childrenlist
+                childrenlist.append(child.to_html())
+            result = "".join(childrenlist)
+            return f"<{self.tag}>{result}</{self.tag}>"
