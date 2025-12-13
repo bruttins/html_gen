@@ -50,6 +50,3 @@ class ParentNode(HTMLNode):
                 childrenlist.append(child.to_html())
             result = "".join(childrenlist)
             return f"<{self.tag}>{result}</{self.tag}>"
-
-def text_node_to_html_node(text_node):
-    
