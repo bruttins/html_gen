@@ -17,9 +17,26 @@ class BlockType(Enum):
     UNORDERED_LIST = "unordered_list"
     ORDERED_LIST = "ordered_list"
 
+def all_lines_start_with_num(block):
+    lines = block.split("\n")
+    expected_num = 1
+    for line in lines:
+        if not line.startswith(f"{expected_num}. "):
+            return False
+        expected_num += 1
+    return True
+
 def block_to_block_type(md_block):
-    if md_block.startswith(("# ","## ","### ","#### ","##### ", "###### "):
+    lines = md_block.split("\n")
+    if md_block.startswith(("# ","## ","### ","#### ","##### ", "###### ")):
         return BlockType.HEADING
     elif md_block.startswith("```") and md_block.endswith("```"):
         return BlockType.CODE
-    elif #how to catch every line?
+    elif all(line.startswith(">") for line in lines):
+        return BlockType.QUOTE
+    elif all(line.startswith("- ") for line in lines):
+        return BlockType.UNORDERED_LIST
+    elif all_lines_start_with_num(md_block):
+        return BlockType.ORDERED_LIST
+    else:
+        return BlockType.PARAGRAPH
