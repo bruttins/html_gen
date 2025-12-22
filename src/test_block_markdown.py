@@ -83,3 +83,5 @@ class TestBlockToBlockType(unittest.TestCase):
         self.assertEqual(block_to_block_type("2. Wrong Order.\n1. As you see."), BlockType.PARAGRAPH)
     def test_blocktype_malformed_lists(self):    
         self.assertEqual(block_to_block_type("1. This List.\n3. Just skips a number."), BlockType.PARAGRAPH)
+    def test_blocktype_malformed_lists(self):
+        self.assertEqual(block_to_block_type("0. This List.\n2. Just skips a number."), BlockType.PARAGRAPH)
