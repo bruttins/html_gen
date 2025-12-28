@@ -27,22 +27,45 @@ def paragraph_node(block):
     return HTMLNode("p", children=children)
 
 def code_node(block):
-    #DON'T USE INLINE_HELPER!
-
+    
 def quote_node(block):
-    #prepare text
+    lines = block.split("\n")
+    new_block = []
+    for line in lines:
+        if not line.strip():
+            continue
+        if line.startswith(">"):
+            clean_line = line[1:].lstrip()
+        else:
+            clean_line = line
+        new_block.append(clean_line)
+    text = "\n".join(new_block)
     children = inline_helper(text)
-    return HTMLNode(
+    return HTMLNode("blockquote", children=children)
 
 def unordered_list_node(block):
-    #prepare list-text
-    children = inline_helper(text)
-    return HTMLNode(
+    lines = block.split("\n")
+    children = []
+    for line in lines:
+        if not line.strip():
+            continue
+        clean_line = line.lstrip("- ")
+        grandchildren = inline_helper(clean_line)
+        children.append(HTMLNode("li", children=grandchildren))
+    return HTMLNode("ul", children=children)
 
 def ordered_list_node(block):
-    #prepare list-text
-    children = inline_helper(text)
-    return HTMLNode(
+    lines = block.split("\n")
+    children = []
+    for line in lines:
+        if not line.strip():
+            continue
+        dot_index = line.find(". ")
+        clean_line = line[dot_index + 2:]
+        grandchildren = inline_helper(clean_line)
+        children.append(HTMLNode("li", children=grandchildren))
+    return HTMLNode("ol", children=children)
+
 
 def blockloop(blocks):
     nodes = []
