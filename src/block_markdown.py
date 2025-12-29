@@ -1,12 +1,43 @@
 from enum import Enum
 
 def markdown_to_blocks(markdown):
+    lines = markdown.split("\n")
     blocks = []
-    splitblocks = markdown.split("\n\n")
-    for block in splitblocks:
-        block = block.strip()
-        if block != "":
-            blocks.append(block)
+    current = []
+    in_code = False
+    for line in lines:
+        stripped = line.rstrip("\n")
+        if stripped.strip().startswith("```"):
+            if in_code:
+                current.append(stripped)
+                blocks.append("\n".join(current).strip())
+                current = []
+                in_code = False
+            else:
+                if current:
+                    blocks.append("\n".join(current).strip())
+                    current = []
+                in_code = True
+                current.append(stripped)
+            continue
+        if in_code:
+            current.append(stripped)
+            continue
+        if not stripped.strip():
+            if current:
+                blocks.append("\n".join(current).strip())
+                current = []
+            continue
+        if stripped.startswith(("# ", "## ", "### ", "#### ", "##### ", "###### ")):
+            if current:
+                blocks.append("\n".join(current).strip())
+                current = []
+            blocks.append(stripped)
+            continue
+        current.append(stripped)
+    if current:
+        blocks.append("\n".join(current).strip())
+
     return blocks
 
 class BlockType(Enum):

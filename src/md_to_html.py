@@ -1,7 +1,7 @@
 from markdownsplit import text_to_textnodes
 from block_markdown import markdown_to_blocks, block_to_block_type, BlockType
-from htmlnode import HTMLNode
-from textnode import text_node_to_html_node
+from htmlnode import ParentNode
+from textnode import text_node_to_html_node, TextNode, TextType
 
 def inline_helper(text):
     textnodes = text_to_textnodes(text)
@@ -20,13 +20,24 @@ def heading_node(block):
     text = block[level:].lstrip()
     tag = f"h{level}"
     children = inline_helper(text)
-    return HTMLNode(tag, children=children)
+    return ParentNode(tag, children=children)
 
 def paragraph_node(block):
-    children = inline_helper(block)
-    return HTMLNode("p", children=children)
+    lines = block.split("\n")
+    text = " ".join(line.strip() for line in lines)
+    children = inline_helper(text)
+    return ParentNode("p", children=children)
 
 def code_node(block):
+    if block.startswith("```"):
+        lines = block.split("\n")
+        inner = "\n".join(lines[1:-1]) + "\n"
+    else:
+        inner = block
+    text_node = TextNode(inner, TextType.TEXT)
+    code_child = text_node_to_html_node(text_node)
+    code_node = ParentNode("code", children=[code_child])
+    return ParentNode("pre", children=[code_node])
     
 def quote_node(block):
     lines = block.split("\n")
@@ -39,9 +50,10 @@ def quote_node(block):
         else:
             clean_line = line
         new_block.append(clean_line)
-    text = "\n".join(new_block)
-    children = inline_helper(text)
-    return HTMLNode("blockquote", children=children)
+    text = " ".join(new_block)
+    inline_children = inline_helper(text)
+    inner_p = ParentNode("p", children=inline_children)
+    return ParentNode("blockquote", children=[inner_p])
 
 def unordered_list_node(block):
     lines = block.split("\n")
@@ -51,8 +63,8 @@ def unordered_list_node(block):
             continue
         clean_line = line.lstrip("- ")
         grandchildren = inline_helper(clean_line)
-        children.append(HTMLNode("li", children=grandchildren))
-    return HTMLNode("ul", children=children)
+        children.append(ParentNode("li", children=grandchildren))
+    return ParentNode("ul", children=children)
 
 def ordered_list_node(block):
     lines = block.split("\n")
@@ -61,16 +73,18 @@ def ordered_list_node(block):
         if not line.strip():
             continue
         dot_index = line.find(". ")
+        if dot_index == -1:
+            continue
         clean_line = line[dot_index + 2:]
         grandchildren = inline_helper(clean_line)
-        children.append(HTMLNode("li", children=grandchildren))
-    return HTMLNode("ol", children=children)
+        children.append(ParentNode("li", children=grandchildren))
+    return ParentNode("ol", children=children)
 
 
 def blockloop(blocks):
     nodes = []
     for block in blocks:
-        blocktype = block_to_block_type(block)
+        btype = block_to_block_type(block)
         if btype == BlockType.HEADING:
             nodes.append(heading_node(block))
         elif btype == BlockType.PARAGRAPH:
@@ -88,3 +102,4 @@ def blockloop(blocks):
 def markdown_to_html_node(markdown):
     blocks = markdown_to_blocks(markdown)
     children = blockloop(blocks)
+    return ParentNode("div", children=children)
