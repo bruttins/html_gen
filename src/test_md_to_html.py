@@ -94,7 +94,7 @@ Here's the next paragraph, containing an ![image](http://example.com/image.png)
         html = node.to_html()
         self.assertEqual(
             html,
-            "<div><blockquote><p>This is a blockquote with <b>bold</b> text. Another line in the blockquote with <i>italic</i> text.</p></blockquote></div>",
+            "<div><blockquote>This is a blockquote with <b>bold</b> text. Another line in the blockquote with <i>italic</i> text.</blockquote></div>",
         )
 
     def test_mixed_content(self):

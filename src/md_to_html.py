@@ -52,8 +52,7 @@ def quote_node(block):
         new_block.append(clean_line)
     text = " ".join(new_block)
     inline_children = inline_helper(text)
-    inner_p = ParentNode("p", children=inline_children)
-    return ParentNode("blockquote", children=[inner_p])
+    return ParentNode("blockquote", children=inline_children)
 
 def unordered_list_node(block):
     lines = block.split("\n")
